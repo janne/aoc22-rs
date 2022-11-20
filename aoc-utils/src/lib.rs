@@ -1,14 +1,7 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use std::fs;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub fn read_input(path: &str) -> Vec<String> {
+    let contents = fs::read_to_string(path).expect("failed to read input");
+    let lines: Vec<&str> = contents.lines().collect();
+    return lines.into_iter().map(|line| line.into()).collect();
 }

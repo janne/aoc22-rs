@@ -1,3 +1,5 @@
+use aoc_utils::read_input;
+
 fn main() {
-    println!("Hello, world!");
+    println!("Input: {:?}", read_input("day1/input"));
 }
