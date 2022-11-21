@@ -1,14 +1,14 @@
-use std::{fmt, fs, str::FromStr};
+use std::{error, fs, str::FromStr};
 
-pub fn read_input<T>(path: &str) -> Vec<T>
+pub type Done = Result<(), Box<dyn error::Error>>;
+
+pub fn read_input<T>(path: &str) -> Result<Vec<T>, Box<dyn error::Error>>
 where
     T: FromStr,
-    T::Err: fmt::Debug,
+    T::Err: error::Error + 'static,
 {
-    let contents = fs::read_to_string(path).expect("failed to read input");
+    let contents = fs::read_to_string(path)?;
     let lines: Vec<&str> = contents.lines().collect();
-    return lines
-        .iter()
-        .map(|line| line.parse().expect("Invalid input"))
-        .collect();
+    let lines: Result<Vec<T>, _> = lines.iter().map(|line| line.parse()).collect();
+    Ok(lines?)
 }
