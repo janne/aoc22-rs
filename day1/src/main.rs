@@ -1,4 +1,4 @@
-use aoc_utils::{read_input, Done};
+use aoc_utils::{read_lines, Done};
 
 fn main() -> Done {
     part_one()?;
@@ -8,7 +8,7 @@ fn main() -> Done {
 }
 
 fn part_one() -> Done {
-    let xs = read_input::<i32>("day1/input")?;
+    let xs = read_lines::<i32>("day1/input")?;
 
     println!("Part one: {:?}", xs);
 
@@ -16,7 +16,7 @@ fn part_one() -> Done {
 }
 
 fn part_two() -> Done {
-    let xs = read_input::<i32>("day1/input")?;
+    let xs = read_lines::<i32>("day1/input")?;
 
     println!("Part two: {:?}", xs);
 
