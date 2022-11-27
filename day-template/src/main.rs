@@ -6,7 +6,7 @@ fn main() -> Result<()> {
     run(&xs, part_a, empty)
 }
 
-fn part_a(_xs: &Vec<i32>) -> Result<i32> {
+fn part_a(xs: &[i32]) -> Result<i32> {
     Ok(0)
 }
 

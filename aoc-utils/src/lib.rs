@@ -3,9 +3,9 @@ use std::{error, fs, str::FromStr};
 
 pub type Result<T> = result::Result<T, Box<dyn error::Error>>;
 
-type PartFn<T, R> = fn(&Vec<T>) -> Result<R>;
+type PartFn<T, R> = fn(&[T]) -> Result<R>;
 
-pub fn run<T, R1, R2>(input: &Vec<T>, part_a: PartFn<T, R1>, part_b: PartFn<T, R2>) -> Result<()>
+pub fn run<T, R1, R2>(input: &[T], part_a: PartFn<T, R1>, part_b: PartFn<T, R2>) -> Result<()>
 where
     R1: fmt::Display,
     R2: fmt::Display,
@@ -19,7 +19,7 @@ where
     Ok(())
 }
 
-pub fn empty<T>(_xs: &Vec<T>) -> Result<char> {
+pub fn empty<T>(_xs: &[T]) -> Result<char> {
     Ok('-')
 }
 
