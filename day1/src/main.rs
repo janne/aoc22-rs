@@ -7,8 +7,15 @@ fn main() -> Result<()> {
 }
 
 fn part_a(xs: &[String]) -> Result<i32> {
-    let calories: Vec<i32> = xs.into_iter().fold([].to_vec(), |acc, x| acc);
-    Ok(0)
+    let calories: Vec<i32> = xs.iter().fold([0].to_vec(), |mut acc, x| {
+        if x.is_empty() {
+            acc.insert(0, 0);
+            return acc;
+        }
+        acc[0] += x.parse::<i32>().unwrap();
+        acc
+    });
+    Ok(calories.into_iter().max().unwrap())
 }
 
 #[cfg(test)]
