@@ -1,9 +1,11 @@
-use aoc_utils::{empty, read_lines, run, Result};
+use std::collections::HashSet;
+
+use aoc_utils::{read_lines, run, Result};
 
 fn main() -> Result<()> {
     let xs = read_lines::<String>("day3/input")?;
 
-    run(&xs, part_a, empty)
+    run(&xs, part_a, part_b)
 }
 
 fn part_a(xs: &[String]) -> Result<i32> {
@@ -16,6 +18,23 @@ fn part_a(xs: &[String]) -> Result<i32> {
                 result += char_value(c);
                 break;
             }
+        }
+    }
+    Ok(result)
+}
+
+fn part_b(xs: &[String]) -> Result<i32> {
+    let mut result = 0;
+    for x in xs.chunks(3) {
+        let sets: Vec<HashSet<char>> = x.iter().map(|y| HashSet::from_iter(y.chars())).collect();
+        let set01: HashSet<char> = sets[0]
+            .intersection(&sets[1])
+            .map(|c| c.to_owned())
+            .collect();
+        let set012: HashSet<char> = set01.intersection(&sets[2]).map(|c| c.to_owned()).collect();
+        result += match set012.into_iter().next() {
+            Some(c) => char_value(c),
+            None => panic!("No found"),
         }
     }
     Ok(result)
@@ -50,6 +69,13 @@ mod tests {
     fn solves_part_a() {
         if let Ok(r) = part_a(&input()) {
             assert_eq!(r, 157);
+        }
+    }
+
+    #[test]
+    fn solves_part_b() {
+        if let Ok(r) = part_b(&input()) {
+            assert_eq!(r, 70);
         }
     }
 }
