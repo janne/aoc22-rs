@@ -10,8 +10,8 @@ where
     R1: fmt::Display,
     R2: fmt::Display,
 {
-    let a = part_a(&input)?;
-    let b = part_b(&input)?;
+    let a = part_a(input)?;
+    let b = part_b(input)?;
 
     println!("Part A: {}", a);
     println!("Part B: {}", b);
