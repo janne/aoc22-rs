@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use aoc_utils::{empty, read_lines, run, Result};
+use aoc_utils::{read_lines, run, Result};
 
 fn parse_line(line: &String) -> (Range<i32>, Range<i32>) {
     let xs: Vec<_> = line
@@ -19,15 +19,27 @@ fn is_fully_overlapping((a, b): &(Range<i32>, Range<i32>)) -> bool {
     (a.start >= b.start && a.end <= b.end) || (b.start >= a.start && b.end <= a.end)
 }
 
+fn is_partly_overlapping((a, b): &(Range<i32>, Range<i32>)) -> bool {
+    (a.start >= b.start && a.start <= b.end)
+        || (a.end >= b.start && a.end <= b.end)
+        || (b.start >= a.start && b.start <= a.end)
+        || (b.end >= a.start && b.end <= a.end)
+}
+
 fn main() -> Result<()> {
     let xs = read_lines::<String>("day4/input")?;
 
-    run(&xs, part_a, empty)
+    run(&xs, part_a, part_b)
 }
 
 fn part_a(xs: &[String]) -> Result<i32> {
     let pairs: Vec<(Range<i32>, Range<i32>)> = xs.iter().map(parse_line).collect();
     Ok(pairs.iter().filter(|x| is_fully_overlapping(*x)).count() as i32)
+}
+
+fn part_b(xs: &[String]) -> Result<i32> {
+    let pairs: Vec<(Range<i32>, Range<i32>)> = xs.iter().map(parse_line).collect();
+    Ok(pairs.iter().filter(|x| is_partly_overlapping(*x)).count() as i32)
 }
 
 #[cfg(test)]
@@ -47,6 +59,13 @@ mod tests {
     fn solves_part_a() {
         if let Ok(r) = part_a(&input()) {
             assert_eq!(r, 2);
+        }
+    }
+
+    #[test]
+    fn solves_part_() {
+        if let Ok(r) = part_b(&input()) {
+            assert_eq!(r, 4);
         }
     }
 }
