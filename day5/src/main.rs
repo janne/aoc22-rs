@@ -1,10 +1,10 @@
-use aoc_utils::{empty, read_lines, run, Result};
+use aoc_utils::{read_lines, run, Result};
 use regex::Regex;
 
 fn main() -> Result<()> {
     let xs = read_lines::<String>("day5/input")?;
 
-    run(&xs, part_a, empty)
+    run(&xs, part_a, part_b)
 }
 
 fn part_a(input: &[String]) -> Result<String> {
@@ -13,6 +13,18 @@ fn part_a(input: &[String]) -> Result<String> {
         for _ in 0..count {
             let c = boxes[from - 1].pop().unwrap();
             boxes[to - 1].push(c);
+        }
+    }
+    Ok(boxes.iter().map(|b| b.last().unwrap()).collect::<String>())
+}
+
+fn part_b(input: &[String]) -> Result<String> {
+    let mut boxes = extract_boxes(input);
+    for (count, from, to) in extract_moves(input) {
+        for i in 0..count {
+            let c = boxes[from - 1].pop().unwrap();
+            let len = boxes[to - 1].len();
+            boxes[to - 1].insert(len - i, c);
         }
     }
     Ok(boxes.iter().map(|b| b.last().unwrap()).collect::<String>())
@@ -78,9 +90,16 @@ mod tests {
     }
 
     #[test]
-    fn returns_zero() {
+    fn solves_part_a() {
         if let Ok(r) = part_a(&input()) {
             assert_eq!(r, "CMZ".to_string());
+        }
+    }
+
+    #[test]
+    fn solves_part_b() {
+        if let Ok(r) = part_b(&input()) {
+            assert_eq!(r, "MCD".to_string());
         }
     }
 }
