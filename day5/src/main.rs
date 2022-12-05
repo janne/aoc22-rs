@@ -1,4 +1,5 @@
 use aoc_utils::{empty, read_lines, run, Result};
+use regex::Regex;
 
 fn main() -> Result<()> {
     let xs = read_lines::<String>("day5/input")?;
@@ -7,21 +8,35 @@ fn main() -> Result<()> {
 }
 
 fn part_a(input: &[String]) -> Result<String> {
-    let boxes = extract_boxes(input);
-    println!("{:?}", boxes);
-    let moves = extract_moves(input);
-    println!("{:?}", moves);
-    Ok("".to_string())
+    let mut boxes = extract_boxes(input);
+    for (count, from, to) in extract_moves(input) {
+        for _ in 0..count {
+            let c = boxes[from - 1].pop().unwrap();
+            boxes[to - 1].push(c);
+        }
+    }
+    Ok(boxes.iter().map(|b| b.last().unwrap()).collect::<String>())
 }
 
-fn extract_moves(input: &[String]) -> Vec<String> {
+fn extract_moves(input: &[String]) -> Vec<(usize, usize, usize)> {
     let mut moves = vec![];
+    let re = Regex::new(r"move (\d+) from (\d+) to (\d+)").unwrap();
     input
         .iter()
         .skip_while(|line| !line.is_empty())
         .skip(1)
         .for_each(|line| moves.push(line.to_owned()));
     moves
+        .iter()
+        .map(|m| {
+            let caps = re.captures_iter(m).next().unwrap();
+            (
+                caps[1].parse::<usize>().unwrap(),
+                caps[2].parse::<usize>().unwrap(),
+                caps[3].parse::<usize>().unwrap(),
+            )
+        })
+        .collect()
 }
 
 fn extract_boxes(input: &[String]) -> Vec<Vec<char>> {
