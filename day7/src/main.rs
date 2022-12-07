@@ -70,19 +70,27 @@ fn part_a(lines: &[String]) -> Result<u32> {
             }
         }
     }
+    let mut sum: u32 = 0;
 
-    Ok(traverse(&root))
+    let mut summer = |v| sum += v;
+
+    traverse(&root, &mut summer);
+
+    Ok(sum)
 }
 
-fn traverse(root: &Rc<RefCell<Dir>>) -> u32 {
+fn traverse<F>(root: &Rc<RefCell<Dir>>, f: &mut F) -> u32
+where
+    F: FnMut(u32),
+{
     let dir = root.borrow();
     let mut sum = 0;
     for child in &dir.children {
-        sum += traverse(child);
+        sum += traverse(child, f);
     }
 
     if dir.size.is_none() && sum <= 100_000 {
-        println!("{}", sum);
+        f(sum);
     }
     dir.size.unwrap_or(0) + sum
 }
