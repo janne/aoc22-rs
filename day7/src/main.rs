@@ -3,15 +3,17 @@ use std::{cell::RefCell, rc::Rc};
 use aoc_utils::{empty, read_lines, run, Result};
 
 struct Dir {
-    size: u32,
+    name: String,
+    size: Option<u32>,
     children: Vec<Rc<RefCell<Dir>>>,
     parent: Option<Rc<RefCell<Dir>>>,
 }
 
 impl Dir {
-    fn new() -> Self {
+    fn new(name: &str, size: Option<u32>) -> Self {
         Dir {
-            size: 0,
+            name: name.to_string(),
+            size,
             children: vec![],
             parent: None,
         }
@@ -29,7 +31,7 @@ fn main() -> Result<()> {
 }
 
 fn part_a(lines: &[String]) -> Result<i32> {
-    let root = Rc::new(RefCell::new(Dir::new()));
+    let root = Rc::new(RefCell::new(Dir::new(".", None)));
     let mut current = Rc::clone(&root);
 
     for line in lines {
@@ -43,8 +45,18 @@ fn part_a(lines: &[String]) -> Result<i32> {
                     }
                     _ => panic!("Unknown input: {:?}", input),
                 },
+                "ls" => (),
                 _ => panic!("Unknown input: {:?}", input),
             },
+            "dir" => {
+                let dir = Dir::new(input[1], None);
+                current.borrow_mut().add_child(Rc::new(RefCell::new(dir)));
+            }
+            i => {
+                let size: u32 = i.parse().unwrap();
+                let dir = Dir::new(input[1], Some(size));
+                current.borrow_mut().add_child(Rc::new(RefCell::new(dir)));
+            }
             _ => panic!("Unknown input: {:?}", input),
         }
     }
