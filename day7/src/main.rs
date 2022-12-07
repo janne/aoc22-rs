@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use aoc_utils::{empty, read_lines, run, Result};
+use aoc_utils::{read_lines, run, Result};
 
 struct Dir {
     name: String,
@@ -23,10 +23,40 @@ impl Dir {
 fn main() -> Result<()> {
     let lines = read_lines::<String>("day7/input")?;
 
-    run(&lines, part_a, empty)
+    run(&lines, part_a, part_b)
 }
 
 fn part_a(lines: &[String]) -> Result<u32> {
+    let root = build_tree(lines);
+    let mut sum: u32 = 0;
+    let mut summer = |v| {
+        if v <= 100_000 {
+            sum += v;
+        }
+    };
+    traverse(&root, &mut summer);
+    Ok(sum)
+}
+
+fn part_b(lines: &[String]) -> Result<u32> {
+    let root = build_tree(lines);
+    let tot = traverse(&root, &mut |_| {});
+    let unused = 70_000_000 - tot;
+    let needed = 30_000_000 - unused;
+    println!("Tot: {}, Unused: {}, Needed: {}", tot, unused, needed);
+    let mut smallest: u32 = 0;
+    traverse(&root, &mut |v| {
+        if v < needed {
+            return;
+        }
+        if smallest == 0 || smallest > v {
+            smallest = v;
+        }
+    });
+    Ok(smallest)
+}
+
+fn build_tree(lines: &[String]) -> Rc<RefCell<Dir>> {
     let root = Rc::new(RefCell::new(Dir::new(".", None)));
     let mut current = Rc::clone(&root);
     for line in lines {
@@ -70,13 +100,7 @@ fn part_a(lines: &[String]) -> Result<u32> {
             }
         }
     }
-    let mut sum: u32 = 0;
-
-    let mut summer = |v| sum += v;
-
-    traverse(&root, &mut summer);
-
-    Ok(sum)
+    root
 }
 
 fn traverse<F>(root: &Rc<RefCell<Dir>>, f: &mut F) -> u32
@@ -89,7 +113,7 @@ where
         sum += traverse(child, f);
     }
 
-    if dir.size.is_none() && sum <= 100_000 {
+    if dir.size.is_none() {
         f(sum);
     }
     dir.size.unwrap_or(0) + sum
@@ -131,9 +155,16 @@ mod tests {
     }
 
     #[test]
-    fn returns_zero() {
+    fn solves_part_a() {
         if let Ok(r) = part_a(&input()) {
             assert_eq!(r, 95437);
+        }
+    }
+
+    #[test]
+    fn solves_part_b() {
+        if let Ok(r) = part_b(&input()) {
+            assert_eq!(r, 24933642);
         }
     }
 }
