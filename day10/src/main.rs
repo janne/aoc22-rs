@@ -1,3 +1,5 @@
+use std::io::Write;
+
 use aoc_utils::{empty, read_lines, run, Result};
 
 struct Cpu {
@@ -26,6 +28,18 @@ impl Cpu {
             + self.cycles[140 - 1] * 140
             + self.cycles[180 - 1] * 180
             + self.cycles[220 - 1] * 220
+    }
+
+    fn process(&mut self, ops: &[Op]) {
+        for op in ops {
+            match op {
+                Op::Noop => self.add_cycles(1),
+                Op::Addx(v) => {
+                    self.add_cycles(2);
+                    self.x += v;
+                }
+            }
+        }
     }
 }
 
@@ -56,16 +70,22 @@ fn main() -> Result<()> {
 fn part_a(lines: &[String]) -> Result<i32> {
     let ops: Vec<Op> = parse(&lines);
     let mut cpu = Cpu::new();
+    cpu.process(&ops);
 
-    for op in ops {
-        match op {
-            Op::Noop => cpu.add_cycles(1),
-            Op::Addx(v) => {
-                cpu.add_cycles(2);
-                cpu.x += v;
-            }
+    for line in 0i32..6 {
+        for col in 0i32..40 {
+            let cycle = line * 40 + col;
+            let x = cpu.cycles[cycle as usize];
+            let char = if col >= x - 1 && col <= x + 1 {
+                "#"
+            } else {
+                "."
+            };
+            print!("{}", char);
         }
+        println!("");
     }
+    std::io::stdout().flush().unwrap();
 
     Ok(cpu.signal_strength())
 }
