@@ -5,25 +5,26 @@ use aoc_utils::Result;
 
 #[derive(Debug)]
 struct Monkey {
-    id: i64,
-    items: Vec<i64>,
+    id: u128,
+    items: Vec<u128>,
     operation: char,
-    operator: Option<i64>,
-    divisor: i64,
-    monkey_true: i64,
-    monkey_false: i64,
-    visited: i64,
+    operator: Option<u128>,
+    divisor: u128,
+    monkey_true: u128,
+    monkey_false: u128,
+    visited: u128,
 }
 
 fn main() -> Result<()> {
     let contents = fs::read_to_string("day11/input")?;
 
-    println!("Part A: {}", part_a(contents)?);
+    println!("Part A: {}", part_a(&contents)?);
+    println!("Part B: {}", part_b(&contents)?);
 
     Ok(())
 }
 
-fn parse(contents: String) -> Vec<RefCell<Monkey>> {
+fn parse(contents: &str) -> Vec<RefCell<Monkey>> {
     let re = Regex::new(
         r"Monkey (\d+):
   Starting items: (.*)
@@ -40,7 +41,7 @@ fn parse(contents: String) -> Vec<RefCell<Monkey>> {
                 id: cap[1].parse().unwrap(),
                 items: cap[2]
                     .split(',')
-                    .map(|s| s.trim().parse::<i64>().unwrap())
+                    .map(|s| s.trim().parse::<u128>().unwrap())
                     .collect(),
                 operation: cap[3].chars().nth(0).unwrap(),
                 operator: cap[4].parse().ok(),
@@ -53,7 +54,7 @@ fn parse(contents: String) -> Vec<RefCell<Monkey>> {
         .collect()
 }
 
-fn part_a(contents: String) -> Result<i64> {
+fn part_a(contents: &str) -> Result<u128> {
     let mut monkeys = parse(contents);
     for _round in 0..20 {
         for monkey in monkeys.iter() {
@@ -65,13 +66,54 @@ fn part_a(contents: String) -> Result<i64> {
                     '+' => item + worry_level,
                     _ => panic!("Unknown operation"),
                 };
-                let worry_level = (worry_level as f64 / 3.0).floor() as i64;
+                let worry_level = (worry_level as f64 / 3.0).floor() as u128;
                 let to_monkey = if worry_level % monkey.borrow().divisor == 0 {
                     monkey.borrow().monkey_true
                 } else {
                     monkey.borrow().monkey_false
                 };
-                let to_monkey = monkeys.iter().find(|m| m.borrow().id == to_monkey).unwrap();
+                let to_monkey = monkeys
+                    .iter()
+                    .find(|m| (*m).borrow().id == to_monkey)
+                    .unwrap();
+                to_monkey.borrow_mut().items.push(worry_level);
+                monkey.borrow_mut().visited += 1;
+            }
+        }
+    }
+    monkeys.sort_by(|a, b| b.borrow().visited.cmp(&a.borrow().visited));
+    let a = monkeys[0].borrow().visited;
+    let b = monkeys[1].borrow().visited;
+    Ok(a * b)
+}
+
+fn part_b(contents: &str) -> Result<u128> {
+    let mut monkeys = parse(contents);
+    let super_modulo = monkeys
+        .iter()
+        .map(|m| m.borrow().divisor)
+        .reduce(|a, b| a * b)
+        .unwrap();
+    for _round in 0..10_000 {
+        for monkey in monkeys.iter() {
+            while !monkey.borrow().items.is_empty() {
+                let item = monkey.borrow_mut().items.remove(0) % super_modulo;
+                let worry_level = monkey.borrow().operator.unwrap_or(item);
+                let worry_level = match monkey.borrow().operation {
+                    '*' => item * worry_level,
+                    '+' => item + worry_level,
+                    _ => panic!("Unknown operation"),
+                };
+                // let worry_level = (worry_level as f64 / 3.0).floor() as u128;
+                let to_monkey = if worry_level % monkey.borrow().divisor == 0 {
+                    monkey.borrow().monkey_true
+                } else {
+                    monkey.borrow().monkey_false
+                };
+                let to_monkey = monkeys
+                    .iter()
+                    .find(|m| (*m).borrow().id == to_monkey)
+                    .unwrap();
                 to_monkey.borrow_mut().items.push(worry_level);
                 monkey.borrow_mut().visited += 1;
             }
@@ -119,9 +161,15 @@ Monkey 3:
     }
 
     #[test]
-    fn returns_zero() {
-        if let Ok(r) = part_a(input()) {
+    fn solves_part_a() {
+        if let Ok(r) = part_a(&input()) {
             assert_eq!(r, 10605);
+        }
+    }
+    #[test]
+    fn solves_part_b() {
+        if let Ok(r) = part_b(&input()) {
+            assert_eq!(r, 2713310158);
         }
     }
 }
